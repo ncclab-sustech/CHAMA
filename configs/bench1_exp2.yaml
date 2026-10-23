@@ -1,0 +1,113 @@
+# Standalone benchmark configuration; paths are relative to the project root.
+# Every model/training option is explicit; experiments may override these values.
+benchmark: bench1_exp2
+data:
+  kind: lorenz_ood
+  loader:
+    path: ../data/generate_data/lorenz_data_long_session_30_trial_100.pt
+    map_location: cpu
+    weights_only: true
+masking:
+  kwargs:
+    train_ratio: 0.6
+    val_ratio: 0.2
+    test_ratio: 0.2
+    full_obs_ratio: 0.2
+model:
+  z_dim: 32
+  Cmax: 3
+  attn_dim: 10
+  behavior_dim: 2
+  hidden_dim: 32
+  num_post_layers: 0
+  num_conditions: 0
+  tf: 500
+  warmup_steps: 10
+  sampling_rate: 500
+  LoRA_rank: 8
+  input_time: 2
+  beh_delay: 5
+  attn_nonlinear: tanh
+  y_nonlinear: none
+  beh_nonlinear: tanh
+  session_variability: false
+  dyn_loss_weight: 1.0
+  recon_loss_weight: 1.0
+  pred_loss_weight: 1.0
+  beh_weight: 0
+  criterion_mode: MSE
+  masked_attention: true
+  use_pos_emb: true
+training:
+  epochs: 1000
+  augment: true
+  n_aug: 1
+  earlystop_epochs: 100
+  mask_ratio: 0.5
+  mask_ratio_range:
+  - 0.3
+  - 0.7
+  test_size: 0.2
+  val_size: 0.2
+  random_state: 42
+  num_workers: 24
+  batch_size: 50
+  shuffle_train: true
+  shuffle_eval: true
+  earlystop_patience: 50
+  earlystop_delta: 0
+  earlystop_verbose: true
+  grad_clip_norm: 1.0
+  eval_interval: 20
+  augmentation_rounding: round
+optimizer:
+  name: AdamW
+  kwargs:
+    lr: 0.001
+    betas:
+    - 0.9
+    - 0.999
+    eps: 1.0e-08
+    weight_decay: 0.01
+    amsgrad: false
+    maximize: false
+    foreach: null
+    capturable: false
+    differentiable: false
+    fused: null
+runtime:
+  devices:
+  - cuda:2
+  seeds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  mask_ratios: []
+  parallel: false
+  max_workers: 1
+  start_method: spawn
+  skip_completed: true
+  max_task_retries: 0
+  worker_start_delay_seconds: 0
+  stagger_workers: 0
+  retry_backoff_base: 2
+evaluation:
+  teacher_forcing:
+  - name: tf_ori
+    tf: null
+  - name: tf_pos1
+    tf: 1
+  - name: tf_neg1
+    tf: -1
+  latent_regression: true
+  decode_observations: false
+  decode_latents: false
+outputs:
+  checkpoint: checkpoints/baselinecomp/Lorenz_OOD/{today}_{exp_name}/seed_{seed}.pth
+  metrics_csv: metrics/baselinecomp/bench1_exp2_results.csv
+experiments:
+- name: CHAMA_L10
+  model: {}
+  training: {}
